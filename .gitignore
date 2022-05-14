@@ -1,7 +1,7 @@
 *.pyc
 __pycache__
 .vscode
-test/*.xml
-test/*.slice
+**.xml
+**.slice
 srcslice-ubuntu-14
 core
