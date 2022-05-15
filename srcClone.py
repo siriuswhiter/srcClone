@@ -2,8 +2,7 @@ import sys, os
 
 from parse import Parser
 from slice import Vector
-
-
+from crANN import CRANN
 
 # input: filename
 # output: AllSP
@@ -44,6 +43,15 @@ def main(file1, file2):
     slicing_vectors_2 = sps2vecs(slice_profiles_2)
 
     # similarity and matching
+    crANN = CRANN(slicing_vectors_1)
+    match_num = 0
+    for vector in slicing_vectors_2:
+        if crANN.query_bool(vector):
+            match_num += 1
+    probability = float(match_num)/float(len(slicing_vectors_2))
+    print(probability)
+
+
 
 
 if __name__ == "__main__":
