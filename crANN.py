@@ -18,7 +18,7 @@ class CRANN(object):
         return self.lsh.query(query_point, distance_func="hamming")
 
     def query_bool(self, query_point):
-        if self.lsh.query(query_point, distance_func="hamming") >= 1:
+        if self.lsh.query(query_point, distance_func="hamming") > 1:
             return False
         else:
             return True
