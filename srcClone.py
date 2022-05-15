@@ -50,6 +50,7 @@ def main(file1, file2):
             match_num += 1
     probability = float(match_num)/float(len(slicing_vectors_2))
     print(probability)
+    return probability
 
 
 
