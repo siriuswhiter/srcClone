@@ -3,17 +3,37 @@
 #
 # This module is part of lshash and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals, division, absolute_import
+from builtins import int, round, str, object  # noqa
+from future import standard_library
+
+standard_library.install_aliases()  # noqa: Counter, OrderedDict,
+from past.builtins import basestring  # noqa:
+
+import future  # noqa
+import builtins  # noqa
+import past  # noqa
+import six  # noqa
 
 import os
 import json
 import numpy as np
 
-from storage import storage
+try:
+    from storage import storage  # py2
+except ImportError:
+    from .storage import storage  # py3
 
 try:
     from bitarray import bitarray
 except ImportError:
     bitarray = None
+
+try:
+    xrange  # py2
+except NameError:
+    xrange = range  # py3
 
 
 class LSHash(object):
@@ -92,7 +112,7 @@ class LSHash(object):
                     self.uniform_planes = [t[1] for t in npzfiles]
             else:
                 self.uniform_planes = [self._generate_uniform_planes()
-                                       for _ in range(self.num_hashtables)]
+                                       for _ in xrange(self.num_hashtables)]
                 try:
                     np.savez_compressed(self.matrices_filename,
                                         *self.uniform_planes)
@@ -101,14 +121,14 @@ class LSHash(object):
                     raise
         else:
             self.uniform_planes = [self._generate_uniform_planes()
-                                   for _ in range(self.num_hashtables)]
+                                   for _ in xrange(self.num_hashtables)]
 
     def _init_hashtables(self):
         """ Initialize the hash tables such that each record will be in the
         form of "[storage1, storage2, ...]" """
 
         self.hash_tables = [storage(self.storage_config, i)
-                            for i in range(self.num_hashtables)]
+                            for i in xrange(self.num_hashtables)]
 
     def _generate_uniform_planes(self):
         """ Generate uniformly distributed hyperplanes and return it as a 2D
@@ -147,7 +167,7 @@ class LSHash(object):
         the original input points stored, and returns the original input point
         in numpy array format.
         """
-        if isinstance(json_or_tuple, str):
+        if isinstance(json_or_tuple, basestring):
             # JSON-serialized in the case of Redis
             try:
                 # Return the point stored as list, without the extra data
@@ -236,13 +256,12 @@ class LSHash(object):
                 binary_hash = self._hash(self.uniform_planes[i], query_point)
                 for key in table.keys():
                     distance = LSHash.hamming_dist(key, binary_hash)
-                    if distance < 2:
+                    if distance < 5:
                         candidates.update(table.get_list(key))
 
             d_func = LSHash.euclidean_dist_square
 
         else:
-
             if distance_func == "euclidean":
                 d_func = LSHash.euclidean_dist_square
             elif distance_func == "true_euclidean":
@@ -263,7 +282,7 @@ class LSHash(object):
         # rank candidates by distance function
         candidates = [(ix, d_func(query_point, self._as_np_array(ix)))
                       for ix in candidates]
-        candidates.sort(key=lambda x: x[1])
+        candidates = sorted(candidates, key=lambda x: x[1])
 
         return candidates[:num_results] if num_results else candidates
 
@@ -298,4 +317,4 @@ class LSHash(object):
 
     @staticmethod
     def cosine_dist(x, y):
-        return 1 - np.dot(x, y) / ((np.dot(x, x) * np.dot(y, y)) ** 0.5)
+        return 1 - float(np.dot(x, y)) / ((np.dot(x, x) * np.dot(y, y)) ** 0.5)
