@@ -19,7 +19,7 @@ class Parser:
         start = len(self.readuntil(input,"{"))
         content = input[start:len(input)-1]
         if content != "":
-            return set(content.split(","))
+            return set(content.split(","))-set([""])
         else:
             return set()
 

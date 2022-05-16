@@ -32,7 +32,7 @@ class CRANN(object):
                     if query_point[j] == i[0][j]:
                         count += 1
                 distance_i = len(query_point) - count
-                if distance < distance_i:
+                if distance > distance_i:
                     distance = distance_i
                 if distance <= 0:
                     return 0

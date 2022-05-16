@@ -29,11 +29,14 @@ class FunctionSP:
     def get_vsp_by_name(self, var_name):
         return self.var_sp_dict.get(var_name)
 
-    def get_vslice_by_name(self, var_name):
+    def get_vslice_by_name(self, var_name, except_name=[]):
         vslice = self.var_slice_dict.get(var_name)
         if vslice == None:
-            vslice = self.__calc_vslice_by_name(var_name)
-            self.var_slice_dict[var_name] = vslice
+            except_name.append(var_name)
+            vslice = self.__calc_vslice_by_name(var_name, except_name)
+            # top level's variable
+            if len(except_name)==1:
+                self.var_slice_dict[var_name] = vslice
         return vslice
 
     def get_vvector_by_name(self, var_name):
@@ -65,7 +68,7 @@ class FunctionSP:
     pointers (Ptrs) fields of the slicing variable, minus any lines that are before the initial 
     definition of the slicing variable (that is, the set {1, ... ,def(v)-1}).
     '''
-    def __calc_vslice_by_name(self, var_name):
+    def __calc_vslice_by_name(self, var_name, except_name=[]):
         vsp = self.get_vsp_by_name(var_name)
         if vsp == None:
             sys.exit("can't find {}'s slice profile.".format(var_name))
@@ -76,11 +79,14 @@ class FunctionSP:
 
         #  union dvars slice
         for dvar in vsp.Dvars:
-            re = re.union(self.get_vslice_by_name(dvar))
+            # no endless recursive
+            if dvar not in except_name:
+                re = re.union(self.get_vslice_by_name(dvar))
         
         #  union ptrs slice
         for ptr in vsp.Ptrs:
-            re = re.union(self.get_vslice_by_name(ptr))
+            if ptr not in except_name:
+                re = re.union(self.get_vslice_by_name(ptr))
 
         # TODO
         #  union cfuncs slice

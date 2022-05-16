@@ -28,10 +28,12 @@ def sps2vecs(all_sp):
 
     for file_name, file_sp in all_sp.file_sp_dict.items():
         for func_name, func_sp in file_sp.func_sp_dict.items():
-            for var_name in func_sp.var_sp_dict:
-                print("{0}-{1}-{2} : {3}".format(file_name, func_name, var_name,
-                                                 func_sp.get_vvector_by_name(var_name).vec()))
-            print("{0}-{1} : {2}".format(file_name, func_name, func_sp.get_vector().vec()))
+            vecset.append(func_sp.get_vector().vec())
+            # for var_name in func_sp.var_sp_dict:
+                # vecset.append(func_sp.get_vvector_by_name(var_name).vec())
+                # print("{0}-{1}-{2} : {3}".format(file_name, func_name, var_name,
+                                                #  func_sp.get_vvector_by_name(var_name).vec()))
+            # print("{0}-{1} : {2}".format(file_name, func_name, func_sp.get_vector().vec()))
 
     return vecset
 
@@ -44,10 +46,11 @@ def main(file1, file2):
     slicing_vectors_2 = sps2vecs(slice_profiles_2)
 
     # similarity and matching
-    # crANN = CRANN(slicing_vectors_1)    crANN.count_probability(slicing_vectors_2)
-    # crANN = CRANN(slicing_vectors_1,slicing_vectors_2)    crANN.count_probability()
-    crANN = CRANN(slicing_vectors_1, slicing_vectors_2)
-    probability = crANN.count_probability()
+    crANN = CRANN(slicing_vectors_1)
+    probability = crANN.count_probability(slicing_vectors_2)
+
+    print(file1," : ",slicing_vectors_1)
+    print(file2," : ",slicing_vectors_2)
     print(probability)
     return probability
 
