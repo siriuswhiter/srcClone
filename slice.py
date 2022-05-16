@@ -174,12 +174,13 @@ class FunctionSP:
 
         return Vector(SC, SCvg, SI, SS)
 
-
 class FileSP:
     def __init__(self, name):
         self.name = name
+        self.sp = None
+        self.slice = None
+        self.vector = None
         self.func_sp_dict = {}
-
 
     def add_function_sp(self, func_sp):
         self.func_sp_dict[func_sp.name] = func_sp
@@ -191,6 +192,61 @@ class FileSP:
             self.func_sp_dict[func_name] = fsp
         return fsp
 
+    def get_sp(self):
+        if self.sp == None:
+            self.sp = self.__calc_sp()
+        return self.sp
+
+    def get_slice(self):
+        if self.slice == None:
+            self.__calc_slice()
+        return self.slice
+
+    def get_vector(self):
+        if self.vector == None:
+            self.vector = self.__calc_vector()
+        return self.vector
+
+    def __calc_sp(self):
+        Def, Use, Dvars, Ptrs,Cfuncs = set(),set(),set(),set(),set()
+        
+        for fsp in self.func_sp_dict.values():
+            Def = Def.union(fsp.sp.Def)
+            Use = Use.union(fsp.sp.Use)
+            Dvars = Dvars.union(fsp.sp.Dvars)
+            Ptrs = Ptrs.union(fsp.sp.Ptrs)
+            Cfuncs = Cfuncs.union(fsp.sp.Cfuncs)
+
+        return SliceProfile(Def, Use, Dvars, Ptrs,Cfuncs)
+  
+    def __calc_slice(self):
+        self.slice = set()
+        for func_name in self.func_sp_dict: # iterate sp_dict, not slice_dict. sp_dict may lack some variables.
+            fslice = self.func_sp_dict[func_name].get_slice()
+            self.slice = self.slice.union(fslice)
+
+    def __calc_vector(self):
+        CS = self.get_slice()
+
+        SC = len(self.func_sp_dict)
+
+        w = max(CS)
+        SZ = len(CS)
+        SCvg = round(SZ/w,1)
+
+        s = set()
+        sp = self.get_sp()
+        s = s.union(sp.Dvars)
+        s = s.union(sp.Ptrs)
+        s = s.union(sp.Cfuncs)
+        SI = len(s)
+
+        Sl = max(CS)
+        Sf = min(CS)
+        SS = round((Sl-Sf)/w, 1)
+
+        return Vector(SC, SCvg, SI, SS)
+ 
 class AllSP:
     def __init__(self):
         self.file_sp_dict = {}
